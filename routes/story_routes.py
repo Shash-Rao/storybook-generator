@@ -6,14 +6,16 @@ story_bp = Blueprint("story", __name__)
 @story_bp.route("/generate-story", methods=["POST"])
 def generate_story_route():
     data = request.json
-    prompt = data.get("prompt")
+    character = data.get("prompt")
+    setting = data.get("setting")
+    event = data.get("event")
 
-    if not prompt:
+    if not character:
         return jsonify({"error": "Missing prompt"}), 400
 
     try:
-        story = generate_story(prompt)
-        return jsonify(story.dict())
+        story = generate_story(character, setting, event)
+        return jsonify(story.model_dump())
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
