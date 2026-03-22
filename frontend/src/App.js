@@ -1,11 +1,15 @@
 import React, { useState } from "react";
-import bgImage from "./background.png";
+import bgImage from "./assets/background.png";
+import StoryView from "./components/StoryView";
 
 function App() {
   const [character, setCharacter] = useState("");
   const [setting, setSetting] = useState("");
   const [storyEvent, setStoryEvent] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [story, setStory] = useState(null);
+  const [showStory, setShowStory] = useState(false);
 
   const isReady = character && setting && storyEvent;
 
@@ -26,64 +30,83 @@ function App() {
       });
 
       const data = await response.json();
-      console.log("Story response:", data);
+      setStory(data);
+
+      // 🔥 wait for fade-out to finish before showing story
+      setTimeout(() => {
+        setShowStory(true);
+      }, 600);
+
     } catch (error) {
-      console.error("Error:", error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.overlay}>
-        <h1 style={styles.title}>
-          What fairy tale shall we read today?
-        </h1>
+    <>
+      {/* 🌫 Landing Page */}
+      <div
+        style={{
+          ...styles.container,
+          opacity: showStory ? 0 : 1,
+          transition: "opacity 0.6s ease",
+          pointerEvents: showStory ? "none" : "auto",
+        }}
+      >
+        <div style={styles.overlay}>
+          <h1 style={styles.title}>
+            What fairy tale shall we read today?
+          </h1>
 
-        <input
-          style={styles.input}
-          type="text"
-          placeholder="Main character (e.g. dragon)"
-          value={character}
-          onChange={(e) => setCharacter(e.target.value)}
-          onFocus={(e) => (e.target.style.border = "2px solid #a78bfa")}
-          onBlur={(e) => (e.target.style.border = "2px solid #ccc")}
-        />
+          <input
+            style={styles.input}
+            type="text"
+            placeholder="Main character (e.g. dragon)"
+            value={character}
+            onChange={(e) => setCharacter(e.target.value)}
+            onFocus={(e) => (e.target.style.border = "2px solid #a78bfa")}
+            onBlur={(e) => (e.target.style.border = "2px solid #ccc")}
+          />
 
-        <input
-          style={styles.input}
-          type="text"
-          placeholder="Setting (e.g. magical kingdom)"
-          value={setting}
-          onChange={(e) => setSetting(e.target.value)}
-          onFocus={(e) => (e.target.style.border = "2px solid #a78bfa")}
-          onBlur={(e) => (e.target.style.border = "2px solid #ccc")}
-        />
+          <input
+            style={styles.input}
+            type="text"
+            placeholder="Setting (e.g. magical kingdom)"
+            value={setting}
+            onChange={(e) => setSetting(e.target.value)}
+            onFocus={(e) => (e.target.style.border = "2px solid #a78bfa")}
+            onBlur={(e) => (e.target.style.border = "2px solid #ccc")}
+          />
 
-        <input
-          style={styles.input}
-          type="text"
-          placeholder="Starting event (e.g. basketball game)"
-          value={storyEvent}
-          onChange={(e) => setStoryEvent(e.target.value)}
-          onFocus={(e) => (e.target.style.border = "2px solid #a78bfa")}
-          onBlur={(e) => (e.target.style.border = "2px solid #ccc")}
-        />
+          <input
+            style={styles.input}
+            type="text"
+            placeholder="Starting event (e.g. basketball game)"
+            value={storyEvent}
+            onChange={(e) => setStoryEvent(e.target.value)}
+            onFocus={(e) => (e.target.style.border = "2px solid #a78bfa")}
+            onBlur={(e) => (e.target.style.border = "2px solid #ccc")}
+          />
 
-        <button
-          style={{
-            ...styles.button,
-            opacity: isReady ? 1 : 0,
-            transform: isReady ? "translateY(0px)" : "translateY(10px)",
-            pointerEvents: isReady && !loading ? "auto" : "none",
-          }}
-          onClick={handleSubmit}
-        >
-          {loading ? "Creating story..." : "Generate Story"}
-        </button>
+          <button
+            style={{
+              ...styles.button,
+              opacity: isReady ? 1 : 0,
+              transform: isReady ? "translateY(0px)" : "translateY(10px)",
+              pointerEvents: isReady && !loading ? "auto" : "none",
+            }}
+            onClick={handleSubmit}
+          >
+            {loading ? "Creating story..." : "Generate Story"}
+          </button>
+        </div>
       </div>
-    </div>
+
+      {/* 📖 Story View (separate layer) */}
+      {showStory && <StoryView story={story} />}
+    </>
   );
 }
 
