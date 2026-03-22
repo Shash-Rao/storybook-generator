@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from services.story_service import generate_story
+from services.image_service import generate_story_images
 
 story_bp = Blueprint("story", __name__)
 
@@ -15,7 +16,12 @@ def generate_story_route():
 
     try:
         story = generate_story(character, setting, event)
-        return jsonify(story.model_dump())
+        story_dict = story.model_dump()
+        story_json = jsonify(story_dict)
+        
+        generate_story_images(story_dict)
+
+        return story_json
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

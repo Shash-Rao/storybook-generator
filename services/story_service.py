@@ -1,12 +1,10 @@
 from models.schema import Story
-from services.prompt_builder import build_prompt
+from services.prompt_builder import build_story_prompt
 from services.llm_service import call_llm
 from utils.format import validate_and_parse
 
 def generate_story(character: str, setting: str, event: str):
-    prompt = build_prompt(character, setting, event)
-
-    raw = call_llm(prompt)
+    prompt = build_story_prompt(character, setting, event)
     
     num_retry = 3
     for _ in range(num_retry):
