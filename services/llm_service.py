@@ -11,7 +11,7 @@ def _init_client():
 
 client = _init_client()
 
-MODEL_NAME = "gemini-flash-latest"
+MODEL_NAME = "gemini-2.5-flash"
 
 def clean_output(text: str) -> str:
     text = text.strip()
