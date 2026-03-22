@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 
 from routes.story_routes import story_bp
@@ -10,6 +10,10 @@ def create_app():
 
     app.register_blueprint(story_bp)
     app.register_blueprint(health_bp)
+
+    @app.route("/images/<filename>")
+    def serve_image(filename):
+        return send_from_directory("storybook_outputs", filename)
 
     return app
 

@@ -14,14 +14,19 @@ function StoryView({ story }) {
   const [direction, setDirection] = useState("forward");
 
   useEffect(() => {
-    setTimeout(() => setVisible(true), 100);
+    const t = setTimeout(() => setVisible(true), 100);
+    return () => clearTimeout(t);
   }, []);
 
   if (!story) return null;
 
   const pages = story.pages || [];
 
-  // ✅ NEXT PAGE
+  const getImageForPage = (index) => {
+    return `http://127.0.0.1:5000/images/page_${index + 1}.png`;
+  };
+
+  // 👉 NEXT (right → left)
   const handleNextPage = () => {
     if (phase !== "idle") return;
 
@@ -41,14 +46,13 @@ function StoryView({ story }) {
 
           setTimeout(() => {
             setPhase("idle");
-          }, 500);
-
-        }, 500);
-      }, 500);
-
-    }, 500);
+          }, 600);
+        }, 700);
+      }, 600);
+    }, 600);
   };
 
+  // 👉 BACK (left → right)
   const handlePrevPage = () => {
     if (phase !== "idle" || currentPage === 0) return;
 
@@ -57,10 +61,10 @@ function StoryView({ story }) {
 
     setTimeout(() => {
       setPhase("turning");
-      setTurnFrame(0); // ✅ start same as forward
+      setTurnFrame(0);
 
       setTimeout(() => {
-        setTurnFrame(1); // ✅ same progression
+        setTurnFrame(1);
 
         setTimeout(() => {
           setCurrentPage((prev) => Math.max(prev - 2, 0));
@@ -69,10 +73,8 @@ function StoryView({ story }) {
           setTimeout(() => {
             setPhase("idle");
           }, 600);
-
         }, 700);
       }, 600);
-
     }, 600);
   };
 
@@ -85,7 +87,7 @@ function StoryView({ story }) {
           transform: visible ? "scale(1)" : "scale(0.95)",
         }}
       >
-        {/* ✅ TURNING ANIMATION */}
+        {/* PAGE TURN */}
         {phase === "turning" ? (
           <img
             src={
@@ -100,34 +102,56 @@ function StoryView({ story }) {
           <>
             {/* LEFT PAGE */}
             <div style={styles.page}>
-              <p
-                style={{
-                  ...styles.leftText,
-                  opacity: phase === "fadingOut" ? 0 : 1,
-                  transition: "opacity 0.5s ease",
-                }}
-              >
-                {pages[currentPage]?.text}
-              </p>
+              {/* IMAGE */}
+              <div style={styles.leftImageContainer}>
+                <img
+                  src={getImageForPage(currentPage)}
+                  style={styles.pageImage}
+                  alt="page illustration"
+                />
+              </div>
+
+              {/* TEXT */}
+              <div style={styles.leftTextContainer}>
+                <p
+                  style={{
+                    ...styles.text,
+                    opacity: phase === "fadingOut" ? 0 : 1,
+                  }}
+                >
+                  {pages[currentPage]?.text}
+                </p>
+              </div>
             </div>
 
             {/* RIGHT PAGE */}
             <div style={styles.page}>
-              <p
-                style={{
-                  ...styles.rightText,
-                  opacity: phase === "fadingOut" ? 0 : 1,
-                  transition: "opacity 0.5s ease",
-                }}
-              >
-                {pages[currentPage + 1]?.text}
-              </p>
+              {/* IMAGE */}
+              <div style={styles.rightImageContainer}>
+                <img
+                  src={getImageForPage(currentPage + 1)}
+                  style={styles.pageImage}
+                  alt="page illustration"
+                />
+              </div>
+
+              {/* TEXT */}
+              <div style={styles.rightTextContainer}>
+                <p
+                  style={{
+                    ...styles.text,
+                    opacity: phase === "fadingOut" ? 0 : 1,
+                  }}
+                >
+                  {pages[currentPage + 1]?.text}
+                </p>
+              </div>
             </div>
           </>
         )}
       </div>
 
-      {/* BUTTONS */}
+      {/* CONTROLS */}
       <button style={styles.nextButton} onClick={handleNextPage}>
         Next →
       </button>
@@ -182,30 +206,56 @@ const styles = {
     position: "relative",
   },
 
-  leftText: {
+  leftImageContainer: {
     position: "absolute",
-    top: "10%",
-    left: "40%",
-    width: "70%",
-    maxWidth: "500px",
-    textAlign: "center",
-    fontFamily: "'IM Fell English SC', serif",
-    fontSize: "clamp(16px, 1.5vw, 24px)",
-    color: "#3b2f2f",
-    lineHeight: "1.5",
+    top: "45%",
+    left: "75%", // tweak this
+    transform: "translate(-50%, -50%)",
   },
 
-  rightText: {
+  rightImageContainer: {
+    position: "absolute",
+    top: "45%",
+    left: "25%", // tweak this
+    transform: "translate(-50%, -50%)",
+  },
+
+  leftTextContainer: {
+    position: "absolute",
+    top: "10%",
+    left: "75%",
+    transform: "translateX(-50%)",
+    width: "70%",
+  },
+
+  rightTextContainer: {
     position: "absolute",
     bottom: "10%",
-    right: "37.5%",
+    left: "25%",
+    transform: "translateX(-50%)",
     width: "70%",
-    maxWidth: "500px",
+  },
+
+  text: {
     textAlign: "center",
     fontFamily: "'IM Fell English SC', serif",
     fontSize: "clamp(16px, 1.5vw, 24px)",
     color: "#3b2f2f",
     lineHeight: "1.5",
+    transition: "opacity 0.5s ease",
+  },
+
+  pageImage: {
+    width: "18vw",
+    maxWidth: "280px",
+    minWidth: "180px",
+
+    objectFit: "contain",
+    pointerEvents: "none",
+
+    WebkitMaskImage: "radial-gradient(circle, black 70%, transparent 100%)",
+    maskImage: "radial-gradient(circle, black 70%, transparent 100%)",
+    filter: "blur(0.2px)",
   },
 
   turnImage: {
