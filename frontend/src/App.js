@@ -5,10 +5,13 @@ function App() {
   const [character, setCharacter] = useState("");
   const [setting, setSetting] = useState("");
   const [storyEvent, setStoryEvent] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const isReady = character && setting && storyEvent;
 
   const handleSubmit = async () => {
+    setLoading(true);
+
     try {
       const response = await fetch("http://127.0.0.1:5000/generate-story", {
         method: "POST",
@@ -23,10 +26,11 @@ function App() {
       });
 
       const data = await response.json();
-
       console.log("Story response:", data);
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,17 +71,16 @@ function App() {
           onBlur={(e) => (e.target.style.border = "2px solid #ccc")}
         />
 
-        {/* ✨ Magical fade-in button */}
         <button
           style={{
             ...styles.button,
             opacity: isReady ? 1 : 0,
             transform: isReady ? "translateY(0px)" : "translateY(10px)",
-            pointerEvents: isReady ? "auto" : "none",
+            pointerEvents: isReady && !loading ? "auto" : "none",
           }}
           onClick={handleSubmit}
         >
-          Generate Story
+          {loading ? "Creating story..." : "Generate Story"}
         </button>
       </div>
     </div>
